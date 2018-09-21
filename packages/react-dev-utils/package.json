@@ -1,9 +1,16 @@
 {
-  "name": "react-dev-utils",
-  "version": "5.0.0",
+  "name": "@gin-betting/cra-dev-utils",
+  "version": "1.0.0",
   "description": "Webpack utilities used by Create React App",
-  "repository": "facebook/create-react-app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/maxieblake/create-react-app"
+  },
   "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.ginsp.net/"
+  },
+  "private": true,
   "bugs": {
     "url": "https://github.com/facebook/create-react-app/issues"
   },
