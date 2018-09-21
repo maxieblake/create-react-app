@@ -20,6 +20,7 @@ const getCSSModuleLocalIdent = require('react-dev-utils/getCSSModuleLocalIdent')
 const getClientEnvironment = require('./env');
 const paths = require('./paths');
 const ManifestPlugin = require('webpack-manifest-plugin');
+const getCacheIdentifier = require('react-dev-utils/getCacheIdentifier');
 
 // Webpack uses `publicPath` to determine where the app is being served from.
 // In development, we always serve from the root. This makes config easier.
@@ -232,6 +233,17 @@ module.exports = {
                   // @remove-on-eject-begin
                   babelrc: false,
                   presets: [require.resolve('babel-preset-react-app')],
+                  // Make sure we have a unique cache identifier, erring on the
+                  // side of caution.
+                  // We remove this when the user ejects because the default
+                  // is sane and uses Babel options. Instead of options, we use
+                  // the react-scripts and babel-preset-react-app versions.
+                  cacheIdentifier: getCacheIdentifier('development', [
+                    'babel-plugin-named-asset-import',
+                    'babel-preset-react-app',
+                    'react-dev-utils',
+                    'react-scripts',
+                  ]),
                   // @remove-on-eject-end
                   plugins: [
                     [
@@ -249,6 +261,8 @@ module.exports = {
                   // It enables caching results in ./node_modules/.cache/babel-loader/
                   // directory for faster rebuilds.
                   cacheDirectory: true,
+                  // Don't waste time on Gzipping the cache
+                  cacheCompression: false,
                   highlightCode: true,
                 },
               },
@@ -276,6 +290,16 @@ module.exports = {
                     require.resolve('babel-preset-react-app/dependencies'),
                   ],
                   cacheDirectory: true,
+                  // Don't waste time on Gzipping the cache
+                  cacheCompression: false,
+                  // @remove-on-eject-begin
+                  cacheIdentifier: getCacheIdentifier('development', [
+                    'babel-plugin-named-asset-import',
+                    'babel-preset-react-app',
+                    'react-dev-utils',
+                    'react-scripts',
+                  ]),
+                  // @remove-on-eject-end
                   highlightCode: true,
                 },
               },
