@@ -10,7 +10,6 @@
   "publishConfig": {
     "registry": "https://npm.ginsp.net/"
   },
-  "private": true,
   "bugs": {
     "url": "https://github.com/facebook/create-react-app/issues"
   },
