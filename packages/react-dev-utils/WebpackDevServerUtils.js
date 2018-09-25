@@ -14,13 +14,12 @@ const chalk = require('chalk');
 const detect = require('detect-port-alt');
 const isRoot = require('is-root');
 const inquirer = require('inquirer');
-const ora = require('ora');
 const clearConsole = require('./clearConsole');
 const formatWebpackMessages = require('./formatWebpackMessages');
 const getProcessForPort = require('./getProcessForPort');
 
 const isInteractive = process.stdout.isTTY;
-let handleCompile = () => {};
+let handleCompile;
 
 // You can safely remove this after ejecting.
 // We only use this block for testing of Create React App itself:
@@ -117,23 +116,11 @@ function printInstructions(appName, urls, useYarn) {
 function createCompiler(webpack, config, appName, urls, useYarn) {
   // "Compiler" is a low-level interface to Webpack.
   // It lets us listen to some events and provide our own custom messages.
-  const spinner = ora();
-
   let compiler;
-  let spinnerTimer;
-
   try {
-    spinnerTimer = setTimeout(() => {
-      spinner.start('Compiling...');
-    }, 1000);
-
-    compiler = webpack(config, (err, stats) => {
-      clearTimeout(spinnerTimer);
-      handleCompile(err, stats);
-    });
+    compiler = webpack(config, handleCompile);
   } catch (err) {
-    clearTimeout(spinnerTimer);
-    spinner.fail(chalk.red('Failed to compile.\n'));
+    console.log(chalk.red('Failed to compile.'));
     console.log();
     console.log(err.message || err);
     console.log();
@@ -145,9 +132,10 @@ function createCompiler(webpack, config, appName, urls, useYarn) {
   // bundle, so if you refresh, it'll wait instead of serving the old one.
   // "invalid" is short for "bundle invalidated", it doesn't imply any errors.
   compiler.hooks.invalid.tap('invalid', () => {
-    if (!spinner.isSpinning) {
-      spinner.start('Compiling...');
-    }
+    // if (isInteractive) {
+    //   clearConsole();
+    // }
+    console.log('Compiling...');
   });
 
   let isFirstCompile = true;
@@ -155,6 +143,10 @@ function createCompiler(webpack, config, appName, urls, useYarn) {
   // "done" event fires when Webpack has finished recompiling the bundle.
   // Whether or not you have warnings or errors, you will get this event.
   compiler.hooks.done.tap('done', stats => {
+    // if (isInteractive) {
+    //   clearConsole();
+    // }
+
     // We have switched off the default Webpack output in WebpackDevServer
     // options so we are going to "massage" the warnings and errors and present
     // them in a readable focused way.
@@ -165,13 +157,11 @@ function createCompiler(webpack, config, appName, urls, useYarn) {
     );
     const isSuccessful = !messages.errors.length && !messages.warnings.length;
     if (isSuccessful) {
-      spinner.succeed(chalk.green('Compiled successfully!\n'));
+      console.log(chalk.green('Compiled successfully!'));
     }
-
-    if (isSuccessful && (isInteractive && isFirstCompile)) {
+    if (isSuccessful && isInteractive && isFirstCompile) {
       printInstructions(appName, urls, useYarn);
     }
-
     isFirstCompile = false;
 
     // If errors exist, only show errors.
@@ -181,15 +171,14 @@ function createCompiler(webpack, config, appName, urls, useYarn) {
       // if (messages.errors.length > 1) {
       //   messages.errors.length = 1;
       // }
-      spinner.fail(chalk.red('Failed to compile.\n'));
+      console.log(chalk.red('Failed to compile.\n'));
       console.log(messages.errors.join('\n\n'));
       return;
     }
 
     // Show warnings if no errors were found.
     if (messages.warnings.length) {
-      spinner.warn(chalk.yellow('Compiled with warnings.\n'));
-
+      console.log(chalk.yellow('Compiled with warnings.\n'));
       console.log(messages.warnings.join('\n\n'));
 
       // Teach some ESLint tricks.
@@ -370,7 +359,7 @@ function choosePort(host, defaultPort) {
             ? `Admin permissions are required to run a server on a port below 1024.`
             : `Something is already running on port ${defaultPort}.`;
         if (isInteractive) {
-          clearConsole();
+          // clearConsole();
           const existingProcess = getProcessForPort(defaultPort);
           const question = {
             type: 'confirm',
