@@ -27,7 +27,6 @@ You can find the most recent version of this guide [here](https://github.com/fac
 - [Post-Processing CSS](#post-processing-css)
 - [Adding a CSS Preprocessor (Sass, Less etc.)](#adding-a-css-preprocessor-sass-less-etc)
 - [Adding Images, Fonts, and Files](#adding-images-fonts-and-files)
-- [Adding GraphQL files](#adding-graphql-files)
 - [Using the `public` Folder](#using-the-public-folder)
   - [Changing the HTML](#changing-the-html)
   - [Adding Assets Outside of the Module System](#adding-assets-outside-of-the-module-system)
@@ -327,13 +326,14 @@ yarn add husky lint-staged prettier
 
 Now we can make sure every file is formatted correctly by adding a few lines to the `package.json` in the project root.
 
-Add the following line to `scripts` section:
+Add the following field to the `package.json` section:
 
 ```diff
-  "scripts": {
-+   "precommit": "lint-staged",
-    "start": "react-scripts start",
-    "build": "react-scripts build",
++  "husky": {
++    "hooks": {
++      "pre-commit": "lint-staged"
++    }
++  }
 ```
 
 Next we add a 'lint-staged' field to the `package.json`, for example:
@@ -623,7 +623,7 @@ Then in `package.json`, add the following lines to `scripts`:
 +    "watch-css": "node-sass-chokidar src/ -o src/ --watch",
      "start": "react-scripts start",
      "build": "react-scripts build",
-     "test": "react-scripts test --env=jsdom",
+     "test": "react-scripts test",
 ```
 
 >Note: To use a different preprocessor, replace `build-css` and `watch-css` commands according to your preprocessor’s documentation.
@@ -672,7 +672,7 @@ Then we can change `start` and `build` scripts to include the CSS preprocessor c
 +    "start": "npm-run-all -p watch-css start-js",
 +    "build-js": "react-scripts build",
 +    "build": "npm-run-all build-css build-js",
-     "test": "react-scripts test --env=jsdom",
+     "test": "react-scripts test",
      "eject": "react-scripts eject"
    }
 ```
@@ -731,34 +731,6 @@ Please be advised that this is also a custom feature of Webpack.
 
 **It is not required for React** but many people enjoy it (and React Native uses a similar mechanism for images).<br>
 An alternative way of handling static assets is described in the next section.
-
-## Adding GraphQL files
-
-> Note: this feature is available with react-scripts@2.0.0 and higher.
-
-If you are using GraphQL, you can **`import` GraphQL files in a JavaScript module**.
-
-By importing GraphQL queries instead of using a [template tag](https://github.com/apollographql/graphql-tag), they are preprocessed at build time. This eliminates the need to process them on the client at run time. It also allows you to separate your GraphQL queries from your code. You can put a GraphQL query in a file with a `.graphql` extension.
-
-Here is an example:
-
-```js
-// query.graphql
-{
-  githubStats(repository: "facebook/react") {
-    stars
-  }
-}
-
-// foo.js
-
-import query from './query.graphql';
-
-console.log(query);
-// {
-//   "kind": "Document",
-// ...
-```
 
 ## Using the `public` Folder
 
@@ -1112,6 +1084,7 @@ These tutorials will help you to integrate your app with an API backend running 
 using `fetch()` to access it.
 
 ### Node
+
 Check out [this tutorial](https://www.fullstackreact.com/articles/using-create-react-app-with-a-server/).
 You can find the companion GitHub repository [here](https://github.com/fullstackreact/food-lookup-demo).
 
@@ -1119,6 +1092,13 @@ You can find the companion GitHub repository [here](https://github.com/fullstack
 
 Check out [this tutorial](https://www.fullstackreact.com/articles/how-to-get-create-react-app-to-work-with-your-rails-api/).
 You can find the companion GitHub repository [here](https://github.com/fullstackreact/food-lookup-demo-rails).
+
+### API Platform (PHP and Symfony)
+
+[API Platform](https://api-platform.com) is a framework designed to build API-driven projects.
+It allows to create hypermedia and GraphQL APIs in minutes.
+It is shipped with an official Progressive Web App generator as well as a dynamic administration interface, both built for Create React App.
+Check out [this tutorial](https://api-platform.com/docs/distribution).
 
 ## Proxying API Requests in Development
 
@@ -1668,23 +1648,14 @@ The build command will check for linter warnings and fail if any are found.
 
 ### Disabling jsdom
 
-By default, the `package.json` of the generated project looks like this:
-
-```js
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom"
-```
-
-If you know that none of your tests depend on [jsdom](https://github.com/tmpvar/jsdom), you can safely remove `--env=jsdom`, and your tests will run faster:
+If you know that none of your tests depend on [jsdom](https://github.com/tmpvar/jsdom), you can safely set `--env=node`, and your tests will run faster:
 
 ```diff
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
--   "test": "react-scripts test --env=jsdom"
-+   "test": "react-scripts test"
+-   "test": "react-scripts test"
++   "test": "react-scripts test --env=node"
 ```
 
 To help you make up your mind, here is a list of APIs that **need jsdom**:
@@ -1722,7 +1693,7 @@ There are various ways to setup a debugger for your Jest tests. We cover debuggi
 Add the following to the `scripts` section in your project's `package.json`
 ```json
 "scripts": {
-    "test:debug": "react-scripts --inspect-brk test --runInBand --env=jsdom"
+    "test:debug": "react-scripts --inspect-brk test --runInBand"
   }
 ```
 Place `debugger;` statements in any test and run:
@@ -1758,8 +1729,7 @@ Use the following [`launch.json`](https://code.visualstudio.com/docs/editor/debu
       "args": [
         "test",
         "--runInBand",
-        "--no-cache",
-        "--env=jsdom"
+        "--no-cache"
       ],
       "cwd": "${workspaceRoot}",
       "protocol": "inspector",
@@ -1996,7 +1966,7 @@ Then in `package.json`, add the following line to `scripts`:
 +    "analyze": "source-map-explorer build/static/js/main.*",
      "start": "react-scripts start",
      "build": "react-scripts build",
-     "test": "react-scripts test --env=jsdom",
+     "test": "react-scripts test",
 ```
 
 Then to analyze the bundle run the production build then run the analyze
@@ -2341,7 +2311,7 @@ GitHub Pages doesn’t support routers that use the HTML5 `pushState` history AP
 
 ##### "/dev/tty: No such a device or address"
 
-If, when deploying, you get `/dev/tty: No such a device or address` or a similar error, try the follwing:
+If, when deploying, you get `/dev/tty: No such a device or address` or a similar error, try the following:
 
 1. Create a new [Personal Access Token](https://github.com/settings/tokens)
 2. `git remote set-url origin https://<user>:<token>@github.com/<user>/<repo>` .
@@ -2485,7 +2455,7 @@ If none of these solutions help please leave a comment [in this thread](https://
 
 ### `npm test` hangs or crashes on macOS Sierra
 
-If you run `npm test` and the console gets stuck after printing `react-scripts test --env=jsdom` to the console there might be a problem with your [Watchman](https://facebook.github.io/watchman/) installation as described in [facebook/create-react-app#713](https://github.com/facebook/create-react-app/issues/713).
+If you run `npm test` and the console gets stuck after printing `react-scripts test` to the console there might be a problem with your [Watchman](https://facebook.github.io/watchman/) installation as described in [facebook/create-react-app#713](https://github.com/facebook/create-react-app/issues/713).
 
 We recommend deleting `node_modules` in your project and running `npm install` (or `yarn` if you use it) first. If it doesn't help, you can try one of the numerous workarounds mentioned in these issues:
 

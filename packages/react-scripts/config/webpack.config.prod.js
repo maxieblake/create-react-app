@@ -8,7 +8,6 @@
 // @remove-on-eject-end
 'use strict';
 
-const autoprefixer = require('autoprefixer');
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -69,8 +68,11 @@ const getStyleLoaders = (cssOptions, preProcessor) => {
         ident: 'postcss',
         plugins: () => [
           require('postcss-flexbugs-fixes'),
-          autoprefixer({
-            flexbox: 'no-2009',
+          require('postcss-preset-env')({
+            autoprefixer: {
+              flexbox: 'no-2009',
+            },
+            stage: 4,
           }),
         ],
         sourceMap: shouldUseSourceMap,
@@ -266,7 +268,10 @@ module.exports = {
               // improves compile time on larger projects
               require.resolve('thread-loader'),
               {
-                loader: require.resolve('babel-loader'),
+                // We need to use our own loader until `babel-loader` supports
+                // customization
+                // https://github.com/babel/babel-loader/pull/687
+                loader: require.resolve('babel-preset-react-app/loader'),
                 options: {
                   // @remove-on-eject-begin
                   babelrc: false,
@@ -390,11 +395,6 @@ module.exports = {
               },
               'sass-loader'
             ),
-          },
-          // The GraphQL loader preprocesses GraphQL queries in .graphql files.
-          {
-            test: /\.(graphql)$/,
-            loader: 'graphql-tag/loader',
           },
           // "file" loader makes sure assets end up in the `build` folder.
           // When you `import` an asset, you get its filename.
