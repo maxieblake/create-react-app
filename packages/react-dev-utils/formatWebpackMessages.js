@@ -32,6 +32,11 @@ function formatMessage(message, isError) {
     return message.indexOf('Thread Loader (Worker') === -1;
   });
 
+  // Add empty line for errors from third-party webpack plugins
+  if (lines.length < 2) {
+    lines[1] = '';
+  }
+
   // Strip `ModuleWarning` head off message before parsing (because of ESLint)
   // https://github.com/webpack/webpack/blob/c77030573de96b8293c69dd396492f8e2d46561e/lib/ModuleWarning.js
   var moduleWarningPrefix = 'Module Warning: ';
@@ -100,6 +105,13 @@ function formatMessage(message, isError) {
         .replace('Error: ', '')
         .replace('[CaseSensitivePathsPlugin] ', ''),
     ];
+  }
+
+  if (lines[1].match(/Cannot find module.+node-sass/)) {
+    lines[1] =
+      'To import Sass files in this project, you need to install node-sass.\n';
+    lines[1] +=
+      'Please run `npm i node-sass --save` or `yarn add node-sass` inside your workspace.';
   }
 
   // Cleans up syntax error messages.

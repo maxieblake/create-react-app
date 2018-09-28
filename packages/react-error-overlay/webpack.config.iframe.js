@@ -32,12 +32,16 @@ module.exports = {
           // Dependencies
           {
             test: /\.js$/,
+            exclude: /@babel(?:\/|\\{1,2})runtime/,
             use: {
               loader: 'babel-loader',
               options: {
                 babelrc: false,
+                configFile: false,
                 compact: false,
-                presets: ['babel-preset-react-app/dependencies'],
+                presets: [
+                  ['babel-preset-react-app/dependencies', { helpers: true }],
+                ],
               },
             },
           },

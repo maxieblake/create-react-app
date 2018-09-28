@@ -60,7 +60,7 @@ const getStyleLoaders = (cssOptions, preProcessor) => {
             autoprefixer: {
               flexbox: 'no-2009',
             },
-            stage: 4,
+            stage: 3,
           }),
         ],
       },
@@ -82,10 +82,7 @@ module.exports = {
   devtool: 'cheap-module-source-map',
   // These are the "entry points" to our application.
   // This means they will be the "root" imports that are included in JS bundle.
-  // The first two entry points enable "hot" CSS and auto-refreshes for JS.
   entry: [
-    // We ship a few polyfills by default:
-    require.resolve('./polyfills'),
     // Include an alternative client for WebpackDevServer. A client's job is to
     // connect to WebpackDevServer by a socket and get notified about changes.
     // When you save a file, the client will either apply hot updates (in case
@@ -147,15 +144,6 @@ module.exports = {
     // for React Native Web.
     extensions: ['.web.js', '.js', '.json', '.web.jsx', '.jsx'],
     alias: {
-      // @remove-on-eject-begin
-      // Resolve Babel runtime relative to react-scripts.
-      // It usually still works on npm 3 without this but it would be
-      // unfortunate to rely on, as react-scripts could be symlinked,
-      // and thus @babel/runtime might not be resolvable from the source.
-      '@babel/runtime': path.dirname(
-        require.resolve('@babel/runtime/package.json')
-      ),
-      // @remove-on-eject-end
       // Support React Native Web
       // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
       'react-native': 'react-native-web',
@@ -237,6 +225,7 @@ module.exports = {
                 options: {
                   // @remove-on-eject-begin
                   babelrc: false,
+                  configFile: false,
                   presets: [require.resolve('babel-preset-react-app')],
                   // Make sure we have a unique cache identifier, erring on the
                   // side of caution.
@@ -269,7 +258,6 @@ module.exports = {
                   cacheDirectory: true,
                   // Don't waste time on Gzipping the cache
                   cacheCompression: false,
-                  highlightCode: true,
                 },
               },
             ],
@@ -278,6 +266,7 @@ module.exports = {
           // Unlike the application JS, we only compile the standard ES features.
           {
             test: /\.js$/,
+            exclude: /@babel(?:\/|\\{1,2})runtime/,
             use: [
               // This loader parallelizes code compilation, it is optional but
               // improves compile time on larger projects
@@ -291,9 +280,13 @@ module.exports = {
                 loader: require.resolve('babel-loader'),
                 options: {
                   babelrc: false,
+                  configFile: false,
                   compact: false,
                   presets: [
-                    require.resolve('babel-preset-react-app/dependencies'),
+                    [
+                      require.resolve('babel-preset-react-app/dependencies'),
+                      { helpers: true },
+                    ],
                   ],
                   cacheDirectory: true,
                   // Don't waste time on Gzipping the cache
@@ -306,7 +299,11 @@ module.exports = {
                     'react-scripts',
                   ]),
                   // @remove-on-eject-end
-                  highlightCode: true,
+                  // If an error happens in a package, it's possible to be
+                  // because it was compiled. Thus, we don't want the browser
+                  // debugger to show the original code. Instead, the code
+                  // being evaluated would be much more helpful.
+                  sourceMaps: false,
                 },
               },
             ],
