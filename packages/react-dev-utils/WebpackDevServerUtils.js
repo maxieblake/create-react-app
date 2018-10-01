@@ -122,7 +122,7 @@ function createCompiler(webpack, config, appName, urls, useYarn) {
   } catch (err) {
     console.log(chalk.red('Failed to compile.'));
     console.log();
-    console.log(err.message || err);
+    console.log(chalk.red(err.message || err));
     console.log();
     process.exit(1);
   }
@@ -155,7 +155,7 @@ function createCompiler(webpack, config, appName, urls, useYarn) {
     const messages = formatWebpackMessages(
       stats.toJson({ all: false, warnings: true, errors: true })
     );
-    const isSuccessful = !messages.errors.length && !messages.warnings.length;
+    const isSuccessful = !messages.errors.length;
     if (isSuccessful) {
       console.log(chalk.green('Compiled successfully!'));
     }
@@ -172,14 +172,14 @@ function createCompiler(webpack, config, appName, urls, useYarn) {
       //   messages.errors.length = 1;
       // }
       console.log(chalk.red('Failed to compile.\n'));
-      console.log(messages.errors.join('\n\n'));
+      console.log(chalk.red(messages.errors.join('\n\n')));
       return;
     }
 
     // Show warnings if no errors were found.
     if (messages.warnings.length) {
       console.log(chalk.yellow('Compiled with warnings.\n'));
-      console.log(messages.warnings.join('\n\n'));
+      console.log(chalk.yellow(messages.warnings.join('\n\n')));
 
       // Teach some ESLint tricks.
       console.log(
