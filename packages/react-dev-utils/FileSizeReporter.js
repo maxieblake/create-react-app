@@ -16,13 +16,11 @@ var stripAnsi = require('strip-ansi');
 var gzipSize = require('gzip-size').sync;
 
 function canReadAsset(asset) {
-    const assetName = asset.name || asset;
-
-    return (
-        /\.(js|css)(\?v=.*)?$/.test(assetName) &&
-        !/service-worker\.js/.test(assetName) &&
-        !/precache-manifest\.[0-9a-f]+\.js/.test(assetName)
-    );
+  return (
+    /\.(js|css)$/.test(asset) &&
+    !/service-worker\.js/.test(asset) &&
+    !/precache-manifest\.[0-9a-f]+\.js/.test(asset)
+  );
 }
 
 // Prints a detailed summary of build files.
@@ -33,39 +31,74 @@ function printFileSizesAfterBuild(
     maxBundleGzipSize,
     maxChunkGzipSize
 ) {
-    var root = previousSizeMap.root;
-    var sizes = previousSizeMap.sizes;
-    var assets = (webpackStats.stats || [webpackStats])
-        .map(stats =>
-            stats
-                .toJson({ all: false, assets: true })
-                .assets.filter(canReadAsset)
-                .map(asset => {
-                    var fileContents = fs.readFileSync(
-                        path.join(root, asset.name.split('?v=')[0])
-                    );
-
-                    var size = gzipSize(fileContents);
-                    var previousSize = sizes[removeFileNameHash(root, asset.name)];
-                    var difference = getDifferenceLabel(size, previousSize);
-                    return {
-                        folder: path.join(
-                            path.basename(buildFolder),
-                            path.dirname(asset.name)
-                        ),
-                        name: path.basename(asset.name),
-                        size: size,
-                        sizeLabel:
-                            filesize(size) +
-                            (difference ? ' (' + difference + ')' : ''),
-                    };
-                })
-        )
-        .reduce((single, all) => all.concat(single), []);
-    assets.sort((a, b) => b.size - a.size);
-    var longestSizeLabelLength = Math.max.apply(
-        null,
-        assets.map(a => stripAnsi(a.sizeLabel).length)
+  var root = previousSizeMap.root;
+  var sizes = previousSizeMap.sizes;
+  var assets = (webpackStats.stats || [webpackStats])
+    .map(stats =>
+      stats
+        .toJson({ all: false, assets: true })
+        .assets.filter(asset => canReadAsset(asset.name))
+        .map(asset => {
+          var fileContents = fs.readFileSync(path.join(root, asset.name));
+          var size = gzipSize(fileContents);
+          var previousSize = sizes[removeFileNameHash(root, asset.name)];
+          var difference = getDifferenceLabel(size, previousSize);
+          return {
+            folder: path.join(
+              path.basename(buildFolder),
+              path.dirname(asset.name)
+            ),
+            name: path.basename(asset.name),
+            size: size,
+            sizeLabel:
+              filesize(size) + (difference ? ' (' + difference + ')' : ''),
+          };
+        })
+    )
+    .reduce((single, all) => all.concat(single), []);
+  assets.sort((a, b) => b.size - a.size);
+  var longestSizeLabelLength = Math.max.apply(
+    null,
+    assets.map(a => stripAnsi(a.sizeLabel).length)
+  );
+  var suggestBundleSplitting = false;
+  assets.forEach(asset => {
+    var sizeLabel = asset.sizeLabel;
+    var sizeLength = stripAnsi(sizeLabel).length;
+    if (sizeLength < longestSizeLabelLength) {
+      var rightPadding = ' '.repeat(longestSizeLabelLength - sizeLength);
+      sizeLabel += rightPadding;
+    }
+    var isMainBundle = asset.name.indexOf('main.') === 0;
+    var maxRecommendedSize = isMainBundle
+      ? maxBundleGzipSize
+      : maxChunkGzipSize;
+    var isLarge = maxRecommendedSize && asset.size > maxRecommendedSize;
+    if (isLarge && path.extname(asset.name) === '.js') {
+      suggestBundleSplitting = true;
+    }
+    console.log(
+      '  ' +
+        (isLarge ? chalk.yellow(sizeLabel) : sizeLabel) +
+        '  ' +
+        chalk.dim(asset.folder + path.sep) +
+        chalk.cyan(asset.name)
+    );
+  });
+  if (suggestBundleSplitting) {
+    console.log();
+    console.log(
+      chalk.yellow('The bundle size is significantly larger than recommended.')
+    );
+    console.log(
+      chalk.yellow(
+        'Consider reducing it with code splitting: https://goo.gl/9VhYWB'
+      )
+    );
+    console.log(
+      chalk.yellow(
+        'You can also analyze the project dependencies: https://goo.gl/LeUzfb'
+      )
     );
     var suggestBundleSplitting = false;
     assets.forEach(asset => {

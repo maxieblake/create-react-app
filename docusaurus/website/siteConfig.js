@@ -26,8 +26,7 @@ const siteConfig = {
 
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
-    { doc: 'doc1', label: 'Docs' },
-    { doc: 'doc4', label: 'API' },
+    { doc: 'getting-started', label: 'Getting started' },
     { href: 'https://reactjs.org/community/support.html', label: 'Help' },
   ],
 
@@ -38,8 +37,8 @@ const siteConfig = {
 
   /* Colors for website */
   colors: {
-    primaryColor: '#2E8555',
-    secondaryColor: '#205C3B',
+    primaryColor: '#20232a',
+    secondaryColor: '#61dafb',
   },
 
   /* Custom fonts for website */
