@@ -1,6 +1,6 @@
 {
   "name": "@gin-betting/cra-dev-utils",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Webpack utilities used by Create React App",
   "repository": {
     "type": "git",
