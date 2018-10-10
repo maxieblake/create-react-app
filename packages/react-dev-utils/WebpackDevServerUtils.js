@@ -19,6 +19,7 @@ const formatWebpackMessages = require('./formatWebpackMessages');
 const getProcessForPort = require('./getProcessForPort');
 
 const isInteractive = process.stdout.isTTY;
+const shouldClearConsole = !process.argv.slice(2).includes('--no-console-clear');
 let handleCompile;
 
 // You can safely remove this after ejecting.
@@ -132,10 +133,10 @@ function createCompiler(webpack, config, appName, urls, useYarn) {
   // bundle, so if you refresh, it'll wait instead of serving the old one.
   // "invalid" is short for "bundle invalidated", it doesn't imply any errors.
   compiler.hooks.invalid.tap('invalid', () => {
-    // if (isInteractive) {
-    //   clearConsole();
-    // }
-    console.log('Compiling...');
+    if (isInteractive && shouldClearConsole) {
+      clearConsole();
+    }
+    // console.log('Compiling...');
   });
 
   let isFirstCompile = true;
@@ -143,7 +144,7 @@ function createCompiler(webpack, config, appName, urls, useYarn) {
   // "done" event fires when Webpack has finished recompiling the bundle.
   // Whether or not you have warnings or errors, you will get this event.
   compiler.hooks.done.tap('done', stats => {
-    // if (isInteractive) {
+    // if (isInteractive && shouldClearConsole) {
     //   clearConsole();
     // }
 
@@ -156,7 +157,7 @@ function createCompiler(webpack, config, appName, urls, useYarn) {
       stats.toJson({ all: false, warnings: true, errors: true })
     );
     const isSuccessful = !messages.errors.length;
-    if (isSuccessful) {
+    if (isSuccessful && !messages.warnings.length) {
       console.log(chalk.green('Compiled successfully!'));
     }
     if (isSuccessful && isInteractive && isFirstCompile) {
@@ -359,7 +360,9 @@ function choosePort(host, defaultPort) {
             ? `Admin permissions are required to run a server on a port below 1024.`
             : `Something is already running on port ${defaultPort}.`;
         if (isInteractive) {
-          // clearConsole();
+          if (shouldClearConsole) {
+            clearConsole();
+          }
           const existingProcess = getProcessForPort(defaultPort);
           const question = {
             type: 'confirm',
