@@ -105,12 +105,12 @@ function printInstructions(appName, urls, useYarn) {
     console.log(`  ${urls.localUrlForTerminal}`);
   }
 
-  console.log();
-  console.log('Note that the development build is not optimized.');
-  console.log(
-    `To create a production build, use ` +
-      `${chalk.cyan(`${useYarn ? 'yarn' : 'npm run'} build`)}.`
-  );
+  // console.log();
+  // console.log('Note that the development build is not optimized.');
+  // console.log(
+  //   `To create a production build, use ` +
+  //     `${chalk.cyan(`${useYarn ? 'yarn' : 'npm run'} build`)}.`
+  // );
   console.log();
 }
 
@@ -144,9 +144,9 @@ function createCompiler(webpack, config, appName, urls, useYarn) {
   // "done" event fires when Webpack has finished recompiling the bundle.
   // Whether or not you have warnings or errors, you will get this event.
   compiler.hooks.done.tap('done', stats => {
-    // if (isInteractive && shouldClearConsole) {
-    //   clearConsole();
-    // }
+    if (isInteractive && shouldClearConsole) {
+      clearConsole();
+    }
 
     // We have switched off the default Webpack output in WebpackDevServer
     // options so we are going to "massage" the warnings and errors and present
@@ -156,17 +156,12 @@ function createCompiler(webpack, config, appName, urls, useYarn) {
     const messages = formatWebpackMessages(
       stats.toJson({ all: false, warnings: true, errors: true })
     );
-    const isSuccessful = !messages.errors.length;
-    if (isSuccessful && !messages.warnings.length) {
-      console.log(chalk.green('Compiled successfully!'));
-    }
-    if (isSuccessful && isInteractive && isFirstCompile) {
-      printInstructions(appName, urls, useYarn);
-    }
-    isFirstCompile = false;
+
+    const hasWarnings = messages.warnings.length > 0;
+    const hasErrors = messages.errors.length > 0;
 
     // If errors exist, only show errors.
-    if (messages.errors.length) {
+    if (hasErrors) {
       // Only keep the first error. Others are often indicative
       // of the same problem, but confuse the reader with noise.
       // if (messages.errors.length > 1) {
@@ -178,22 +173,19 @@ function createCompiler(webpack, config, appName, urls, useYarn) {
     }
 
     // Show warnings if no errors were found.
-    if (messages.warnings.length) {
+    if (hasWarnings) {
       console.log(chalk.yellow('Compiled with warnings.\n'));
       console.log(chalk.yellow(messages.warnings.join('\n\n')));
-
-      // Teach some ESLint tricks.
-      console.log(
-        '\nSearch for the ' +
-          chalk.underline(chalk.yellow('keywords')) +
-          ' to learn more about each warning.'
-      );
-      console.log(
-        'To ignore, add ' +
-          chalk.cyan('// eslint-disable-next-line') +
-          ' to the line before.\n'
-      );
     }
+
+    if (!hasWarnings && !hasErrors) {
+      console.log(chalk.green('Compiled successfully!'));
+    }
+    if (!hasErrors && isInteractive && isFirstCompile) {
+      printInstructions(appName, urls, useYarn);
+    }
+
+    isFirstCompile = false;
   });
   return compiler;
 }
