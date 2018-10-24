@@ -33,11 +33,14 @@ function formatter(message, useColors) {
       .join(os.EOL);
   }
 
+  const tsErrorCode = messageColor.underline(`TS${message.code}`);
+  const tsEventType = message.getSeverity().toUpperCase();
+
   return [
-    messageColor.bold(`Type ${message.getSeverity().toLowerCase()}: `) +
-      message.getContent() +
-      '  ' +
-      messageColor.underline(`TS${message.code}`),
+    messageColor.bold(`${tsEventType} (${tsErrorCode}): `) +
+    messageColor(message.getContent()) +
+    '',
+    chalk.gray(`in ${message.getFile()}(${message.getLine()},${message.getCharacter()}))`),
     '',
     frame,
   ].join(os.EOL);

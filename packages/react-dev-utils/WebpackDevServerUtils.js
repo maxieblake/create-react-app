@@ -128,23 +128,22 @@ function createCompiler(webpack, config, appName, urls, useYarn) {
     process.exit(1);
   }
 
+  let isFirstCompile = true;
   // "invalid" event fires when you have changed a file, and Webpack is
   // recompiling a bundle. WebpackDevServer takes care to pause serving the
   // bundle, so if you refresh, it'll wait instead of serving the old one.
   // "invalid" is short for "bundle invalidated", it doesn't imply any errors.
   compiler.hooks.invalid.tap('invalid', () => {
-    if (isInteractive && shouldClearConsole) {
+    if (!isFirstCompile && isInteractive && shouldClearConsole) {
       clearConsole();
     }
     // console.log('Compiling...');
   });
 
-  let isFirstCompile = true;
-
   // "done" event fires when Webpack has finished recompiling the bundle.
   // Whether or not you have warnings or errors, you will get this event.
   compiler.hooks.done.tap('done', stats => {
-    if (isInteractive && shouldClearConsole) {
+    if (!isFirstCompile && isInteractive && shouldClearConsole) {
       clearConsole();
     }
 
@@ -168,7 +167,7 @@ function createCompiler(webpack, config, appName, urls, useYarn) {
       //   messages.errors.length = 1;
       // }
       console.log(chalk.red('Failed to compile.\n'));
-      console.log(chalk.red(messages.errors.join('\n\n')));
+      console.log(messages.errors.join('\n\n'));
       return;
     }
 
