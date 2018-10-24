@@ -30,6 +30,11 @@ module.exports = function(api, opts, env) {
   var isEnvTest = env === 'test';
 
   var isFlowEnabled = validateBoolOption('flow', opts.flow, true);
+  var isTypeScriptEnabled = validateBoolOption(
+    'typescript',
+    opts.typescript,
+    true
+  );
   var areHelpersEnabled = validateBoolOption('helpers', opts.helpers, true);
   var useAbsoluteRuntime = validateBoolOption(
     'absoluteRuntime',
@@ -97,6 +102,7 @@ module.exports = function(api, opts, env) {
           useBuiltIns: true,
         },
       ],
+      isTypeScriptEnabled && [require('@babel/preset-typescript').default],
     ].filter(Boolean),
     plugins: [
       // Strip flow types before any other transform, emulating the behavior
@@ -158,7 +164,7 @@ module.exports = function(api, opts, env) {
       require('@babel/plugin-syntax-dynamic-import').default,
       isEnvTest &&
         // Transform dynamic import to require
-        require('babel-plugin-transform-dynamic-import').default,
+        require('babel-plugin-dynamic-import-node'),
     ].filter(Boolean),
   };
 };
