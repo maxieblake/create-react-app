@@ -98,6 +98,7 @@ function verifyTypeScriptSetup() {
     esModuleInterop: { suggested: true },
     allowSyntheticDefaultImports: { suggested: true },
     strict: { suggested: true },
+    forceConsistentCasingInFileNames: { suggested: true },
 
     // These values are required and cannot be changed by the user
     module: {
@@ -209,10 +210,6 @@ function verifyTypeScriptSetup() {
     messages.push(
       `${chalk.cyan('include')} should be ${chalk.cyan.bold('src')}`
     );
-  }
-  if (parsedTsConfig.exclude == null) {
-    appTsConfig.exclude = ['**/__tests__/**', '**/?*test.*', '**/?*spec.*'];
-    messages.push(`${chalk.cyan('exclude')} should exclude test files`);
   }
 
   if (messages.length > 0) {
