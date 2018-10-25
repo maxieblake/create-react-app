@@ -18,7 +18,7 @@ const immer = require('react-dev-utils/immer').produce;
 const globby = require('react-dev-utils/globby').sync;
 
 function writeJson(fileName, object) {
-  fs.writeFileSync(fileName, JSON.stringify(object, null, 2) + os.EOL);
+  fs.writeFileSync(fileName, JSON.stringify(object, null, 4) + os.EOL);
 }
 
 function verifyNoTypeScript() {
@@ -244,13 +244,14 @@ function verifyTypeScriptSetup() {
     '..',
     '..',
     'config',
-    'react-app.d.ts'
+    'app.d.ts'
   );
   const declaredTypesContent = fs
     .readFileSync(declaredTypes, 'utf8')
     .replace(/\/\/ @remove-file-on-eject\r?\n/, '');
+
   fs.writeFileSync(
-    path.resolve(paths.appSrc, 'react-app.d.ts'),
+    path.resolve(paths.appSrc, 'app.d.ts'),
     declaredTypesContent
   );
 }
