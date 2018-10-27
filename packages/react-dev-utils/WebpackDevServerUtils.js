@@ -166,8 +166,17 @@ function createCompiler(webpack, config, appName, urls, useYarn) {
       // if (messages.errors.length > 1) {
       //   messages.errors.length = 1;
       // }
-      console.log(chalk.red('Failed to compile.\n'));
-      console.log(messages.errors.join('\n\n'));
+      clearConsole();
+      console.log(chalk.white.bgRed('Failed to compile.\n'));
+
+      const coloredMessages = messages.errors.map(message => {
+        // detect TS errors
+        if (/\.tsx?\(\d/.test(message)) { return message };
+
+        return chalk.red(message);
+      });
+
+      console.log(coloredMessages.join('\n\n'));
       return;
     }
 
