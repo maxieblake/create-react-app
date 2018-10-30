@@ -39,7 +39,7 @@ module.exports = function printBuildError(err) {
     }
     console.log('Read more here: http://bit.ly/CRA-build-minify');
   } else {
-    console.log((message || err) + '\n');
+    console.log(chalk.red(stack ? stack : (message || err)));
   }
   console.log();
 };
