@@ -14,12 +14,24 @@ const fs = require('fs');
 
 function formatter(message, useColors) {
   const colors = new chalk.constructor({ enabled: useColors });
-  const messageColor = message.isWarningSeverity() ? colors.yellow : colors.red;
+  const messageColor = message.isWarningSeverity()
+    ? colors.yellow
+    : colors.red;
+
+  const getFromMessage = (target) => {
+    const methodName = target.charAt(0).toUpperCase() + target.slice(1);
+
+    if (typeof message[methodName] === 'function') {
+      return message[methodName]();
+    }
+
+    return message[target];
+  }
 
   const source =
-    message.getFile() &&
-    fs.existsSync(message.getFile()) &&
-    fs.readFileSync(message.getFile(), 'utf-8');
+    getFromMessage('file') &&
+    fs.existsSync(getFromMessage('file')) &&
+    fs.readFileSync(getFromMessage('file'), 'utf-8');
   let frame = '';
 
   if (source) {
@@ -34,13 +46,18 @@ function formatter(message, useColors) {
   }
 
   const tsErrorCode = messageColor.underline(`TS${message.code}`);
-  const tsEventType = message.getSeverity().toUpperCase();
+  const tsEventType = getFromMessage('severity').toUpperCase();
 
   return [
     messageColor.bold(`${tsEventType} (${tsErrorCode}): `) +
-    messageColor(message.getContent()) +
+    messageColor(getFromMessage('content')) +
     '',
-    chalk.gray(`in ${message.getFile()}(${message.getLine()},${message.getCharacter()}))`),
+    chalk.gray(
+      `in ${getFromMessage('file')}(${getFromMessage(
+        'line',
+        message
+      )},${getFromMessage('character')}))`
+    ),
     '',
     frame,
   ].join(os.EOL);
