@@ -117,6 +117,8 @@ REACT_APP_NOT_SECRET_CODE=abcdef
 
 > Note: You must create custom environment variables beginning with `REACT_APP_`. Any other variables except `NODE_ENV` will be ignored to avoid [accidentally exposing a private key on the machine that could have the same name](https://github.com/facebook/create-react-app/issues/865#issuecomment-252199527). Changing any environment variables will require you to restart the development server if it is running.
 
+> Note: You need to restart the development server after changing `.env` files.
+
 `.env` files **should be** checked into source control (with the exclusion of `.env*.local`).
 
 ### What other `.env` files can be used?
@@ -134,7 +136,8 @@ Files on the left have more priority than files on the right:
 - `npm run build`: `.env.production.local`, `.env.production`, `.env.local`, `.env`
 - `npm test`: `.env.test.local`, `.env.test`, `.env` (note `.env.local` is missing)
 
-These variables will act as the defaults if the machine does not explicitly set them.<br>
+These variables will act as the defaults if the machine does not explicitly set them.
+
 Please refer to the [dotenv documentation](https://github.com/motdotla/dotenv) for more details.
 
 > Note: If you are defining environment variables for development, your CI and/or hosting platform will most likely need
