@@ -136,7 +136,6 @@ function createCompiler({
     // console.log('Compiling...');
   });
 
-  let isFirstCompile = true;
   let tsMessagesPromise;
   let tsMessagesResolver;
 
@@ -225,6 +224,8 @@ function createCompiler({
 
     const messages = formatWebpackMessages(statsData);
     const isSuccessful = !messages.errors.length && !messages.warnings.length;
+    const hasWarnings = messages.warnings.length > 0;
+    const hasErrors = messages.errors.length > 0;
     if (isSuccessful) {
       console.log(chalk.green('Compiled successfully!'));
     }
@@ -245,7 +246,9 @@ function createCompiler({
 
       const coloredMessages = messages.errors.map(message => {
         // detect TS errors
-        if (/\.tsx?\(\d/.test(message)) { return message };
+        if (/\.tsx?\(\d/.test(message)) {
+          return message;
+        }
 
         return chalk.red(message);
       });
