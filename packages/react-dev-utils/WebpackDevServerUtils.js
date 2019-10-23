@@ -21,6 +21,9 @@ const typescriptFormatter = require('./typescriptFormatter');
 const forkTsCheckerWebpackPlugin = require('./ForkTsCheckerWebpackPlugin');
 
 const isInteractive = process.stdout.isTTY;
+const shouldClearConsole = !process.argv
+  .slice(2)
+  .includes('--no-console-clear');
 
 function prepareUrls(protocol, host, port) {
   const formatUrl = hostname =>
@@ -165,7 +168,7 @@ function createCompiler({
   // "done" event fires when Webpack has finished recompiling the bundle.
   // Whether or not you have warnings or errors, you will get this event.
   compiler.hooks.done.tap('done', async stats => {
-    if (isInteractive) {
+    if (!isFirstCompile && isInteractive && shouldClearConsole) {
       clearConsole();
     }
 
@@ -217,7 +220,7 @@ function createCompiler({
         devSocket.warnings(messages.warnings);
       }
 
-      if (isInteractive) {
+      if (isInteractive && shouldClearConsole) {
         clearConsole();
       }
     }
