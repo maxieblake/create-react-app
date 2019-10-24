@@ -18,14 +18,14 @@ function formatter(message, useColors) {
   const { type, severity, file, line, content, code, character } =
     typeof message.getFile === 'function'
       ? {
-          type: message.getType(),
-          severity: message.getSeverity(),
-          file: message.getFile(),
-          line: message.getLine(),
-          content: message.getContent(),
-          code: message.getCode(),
-          character: message.getCharacter(),
-        }
+        type: message.getType(),
+        severity: message.getSeverity(),
+        file: message.getFile(),
+        line: message.getLine(),
+        content: message.getContent(),
+        code: message.getCode(),
+        character: message.getCharacter(),
+      }
       : message;
 
   const colors = new chalk.constructor({ enabled: useColors });
@@ -35,25 +35,22 @@ function formatter(message, useColors) {
   const source = file && fs.existsSync(file) && fs.readFileSync(file, 'utf-8');
   const frame = source
     ? codeFrame(
-        source,
-        { start: { line: line, column: character } },
-        { highlightCode: useColors }
-      )
-        .split('\n')
-        .map(str => '  ' + str)
-        .join(os.EOL)
+      source,
+      { start: { line: line, column: character } },
+      { highlightCode: useColors }
+    )
+      .split('\n')
+      .map(str => '  ' + str)
+      .join(os.EOL)
     : '';
-
-  const tsErrorCode = messageColor.underline(`TS${message.code}`);
-  const tsEventType = getFromMessage('severity').toUpperCase();
 
   return [
     messageColor.bold(`${types[type]} ${severity.toLowerCase()} in `) +
-      fileAndNumberColor(`${file}(${line},${character})`) +
-      messageColor(':'),
+    fileAndNumberColor(`${file}(${line},${character})`) +
+    messageColor(':'),
     content +
-      '  ' +
-      messageColor.underline((type === 'lint' ? 'Rule: ' : 'TS') + code),
+    '  ' +
+    messageColor.underline((type === 'lint' ? 'Rule: ' : 'TS') + code),
     '',
     frame,
   ].join(os.EOL);
