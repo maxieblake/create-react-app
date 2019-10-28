@@ -40,6 +40,7 @@ module.exports = function(api, opts, env) {
     opts.typescript,
     true
   );
+
   var areHelpersEnabled = validateBoolOption('helpers', opts.helpers, true);
   var useAbsoluteRuntime = validateBoolOption(
     'absoluteRuntime',
